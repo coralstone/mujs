@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="mujs" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/mujs" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/mujs" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="astnames.h" />
+		<Unit filename="jsarray.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsboolean.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsbuiltin.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsbuiltin.h" />
+		<Unit filename="jscompile.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jscompile.h" />
+		<Unit filename="jsdate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsdtoa.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsdump.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jserror.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsfunction.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsgc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsi.h" />
+		<Unit filename="jsintern.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jslex.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jslex.h" />
+		<Unit filename="jsmath.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsnumber.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsobject.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="json.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsparse.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsparse.h" />
+		<Unit filename="jsproperty.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsregexp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsrun.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsrun.h" />
+		<Unit filename="jsstate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsstring.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsvalue.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="jsvalue.h" />
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="mujs.cbp" />
+		<Unit filename="mujs.h" />
+		<Unit filename="opnames.h" />
+		<Unit filename="regexp.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="regexp.h" />
+		<Unit filename="utf.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="utf.h" />
+		<Unit filename="utftype.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
