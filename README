@@ -5,6 +5,7 @@ ABOUT
 MuJS is a lightweight Javascript interpreter designed for embedding in
 other software to extend them with scripting capabilities.
 
+this source code was colone from lua..
 LICENSE
 
 MuJS is Copyright 2013-2017 Artifex Software, Inc.
