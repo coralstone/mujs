@@ -720,5 +720,5 @@ void jb_initarray(js_State *J)
 		/* ES5 */
 		jb_prop_func(J, "Array.isArray", A_isArray, 1);
 	}
-	js_defglobal(J, "Array", JS_DONTENUM);
+	js_def_global(J, "Array", JS_DONTENUM);
 }

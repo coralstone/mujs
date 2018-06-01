@@ -186,25 +186,25 @@ main(int argc, char **argv)
 	J = js_newstate(NULL, NULL, JS_STRICT);
 
 	js_cfunction(J, jb_gc, "gc", 0);
-	js_setglobal(J, "gc");
+	js_set_global(J, "gc");
 
 	js_cfunction(J, jb_load, "load", 1);
-	js_setglobal(J, "load");
+	js_set_global(J, "load");
 
 	js_cfunction(J, jb_print, "print", 0);
-	js_setglobal(J, "print");
+	js_set_global(J, "print");
 
 	js_cfunction(J, jb_write, "write", 0);
-	js_setglobal(J, "write");
+	js_set_global(J, "write");
 
 	js_cfunction(J, jb_read, "read", 1);
-	js_setglobal(J, "read");
+	js_set_global(J, "read");
 
 	js_cfunction(J, jb_readline, "readline", 0);
-	js_setglobal(J, "readline");
+	js_set_global(J, "readline");
 
 	js_cfunction(J, jb_quit, "quit", 1);
-	js_setglobal(J, "quit");
+	js_set_global(J, "quit");
 
 	js_dostring(J, require_js);
 	js_dostring(J, stacktrace_js);

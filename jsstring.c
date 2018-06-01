@@ -83,8 +83,8 @@ static void Sp_charAt(js_State *J)
 {
 	char buf[UTFmax + 1];
 	const char *s = checkstring(J, 0);
-	int pos = js_tointeger(J, 1);
-	Rune rune = js_runeat(J, s, pos);
+	int pos      = js_tointeger(J, 1);
+	Rune rune    = js_runeat(J, s, pos);
 	if (rune > 0) {
 		buf[runetochar(buf, &rune)] = 0;
 		js_push_string(J, buf);
@@ -692,5 +692,5 @@ void jb_initstring(js_State *J)
 	{
 		jb_prop_func(J, "String.fromCharCode", S_fromCharCode, 0); /* 1 */
 	}
-	js_defglobal(J, "String", JS_DONTENUM);
+	js_def_global(J, "String", JS_DONTENUM);
 }

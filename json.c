@@ -163,7 +163,7 @@ static void fmtnum(js_State *J, js_Buffer **sb, double n)
 	else if (n == 0) js_puts(J, sb, "0");
 	else {
 		char buf[40];
-		js_puts(J, sb, jsV_ntos(J, buf, n));
+		js_puts(J, sb, jv_ntos(J, buf, n));
 	}
 }
 
@@ -367,10 +367,10 @@ static void JSON_stringify(js_State *J)
 
 void jb_initjson(js_State *J)
 {
-	js_push_object(J, jsV_newobject(J, JS_CJSON, J->Object_prototype));
+	js_push_object(J, js_newobject(J, JS_CJSON, J->Object_prototype));
 	{
 		jb_prop_func(J, "JSON.parse", JSON_parse, 2);
 		jb_prop_func(J, "JSON.stringify", JSON_stringify, 3);
 	}
-	js_defglobal(J, "JSON", JS_DONTENUM);
+	js_def_global(J, "JSON", JS_DONTENUM);
 }

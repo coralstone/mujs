@@ -34,7 +34,7 @@ static void Np_toString(js_State *J)
 	if (self->type != JS_CNUMBER)
 		js_error_type(J, "not a number");
 	if (radix == 10) {
-		js_push_string(J, jsV_ntos(J, buf, self->u.number));
+		js_push_string(J, jv_ntos(J, buf, self->u.number));
 		return;
 	}
 	if (radix < 2 || radix > 36)
@@ -181,5 +181,5 @@ void jb_initnumber(js_State *J)
 		jb_prop_num(J, "NEGATIVE_INFINITY", -INFINITY);
 		jb_prop_num(J, "POSITIVE_INFINITY", INFINITY);
 	}
-	js_defglobal(J, "Number", JS_DONTENUM);
+	js_def_global(J, "Number", JS_DONTENUM);
 }

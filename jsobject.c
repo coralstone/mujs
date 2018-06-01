@@ -61,7 +61,7 @@ static void Op_hasOwnProperty(js_State *J)
 {
 	js_Object *self = js_toobject(J, 0);
 	const char *name = js_tostring(J, 1);
-	js_Property *ref = jsV_getownproperty(J, self, name);
+	js_Property *ref = jp_getownproperty(J, self, name);
 	js_push_bool(J, ref != NULL);
 }
 
@@ -85,7 +85,7 @@ static void Op_propertyIsEnumerable(js_State *J)
 {
 	js_Object *self = js_toobject(J, 0);
 	const char *name = js_tostring(J, 1);
-	js_Property *ref = jsV_getownproperty(J, self, name);
+	js_Property *ref = jp_getownproperty(J, self, name);
 	js_push_bool(J, ref && !(ref->atts & JS_DONTENUM));
 }
 
@@ -110,7 +110,7 @@ static void O_getOwnPropertyDescriptor(js_State *J)
 	JS_CHECK_OBJ(J, 1);
 
 	obj = js_toobject(J, 1);
-	ref = jsV_getproperty(J, obj, js_tostring(J, 2));
+	ref = jp_getproperty(J, obj, js_tostring(J, 2));
 	if (!ref)
 		js_push_undef(J);
 	else {
@@ -309,7 +309,7 @@ static void O_create(js_State *J)
 	else
 		js_error_type(J, "not an object or null");
 
-	obj = jsV_newobject(J, JS_COBJECT, proto);
+	obj = js_newobject(J, JS_COBJECT, proto);
 	js_push_object(J, obj);
 
 	if (js_is_def(J, 2)) {
@@ -509,5 +509,5 @@ void jb_initobject(js_State *J)
 		jb_prop_func(J, "Object.isExtensible", O_isExtensible, 1);
 		jb_prop_func(J, "Object.keys", O_keys, 1);
 	}
-	js_defglobal(J, "Object", JS_DONTENUM);
+	js_def_global(J, "Object", JS_DONTENUM);
 }

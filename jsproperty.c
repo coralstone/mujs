@@ -26,6 +26,8 @@ static js_Property sentinel = {
 	NULL, NULL
 };
 
+#define CHECK_PROP(prop) (prop && prop != &sentinel)
+
 static js_Property *newproperty(js_State *J, js_Object *obj, const char *name)
 {
 	js_Property *node = js_malloc(J, sizeof *node);
@@ -43,7 +45,7 @@ static js_Property *newproperty(js_State *J, js_Object *obj, const char *name)
 
 static js_Property *lookup(js_Property *node, const char *name)
 {
-	while (node != &sentinel) {
+	while (CHECK_PROP(node)) {
 		int c = strcmp(name, node->name);
 		if (c == 0)
 			return node;
@@ -53,6 +55,11 @@ static js_Property *lookup(js_Property *node, const char *name)
 			node = node->right;
 	}
 	return NULL;
+}
+
+static js_Property *find_obj_prop(js_Object *obj,const char *name)
+{
+    return lookup(obj->properties,name);
 }
 
 static js_Property *skew(js_Property *node)
@@ -80,10 +87,10 @@ static js_Property *split(js_Property *node)
 
 static js_Property *insert(js_State *J, js_Object *obj, js_Property *node, const char *name, js_Property **result)
 {
-	if (node != &sentinel) {
+	if (CHECK_PROP(node)) {
 		int c = strcmp(name, node->name);
 		if (c < 0)
-			node->left = insert(J, obj, node->left, name, result);
+			node->left  = insert(J, obj, node->left, name, result);
 		else if (c > 0)
 			node->right = insert(J, obj, node->right, name, result);
 		else
@@ -105,7 +112,7 @@ static js_Property *delete(js_State *J, js_Object *obj, js_Property *node, const
 {
 	js_Property *temp, *succ;
 
-	if (node != &sentinel) {
+	if (CHECK_PROP(node)) {
 		int c = strcmp(name, node->name);
 		if (c < 0) {
 			node->left = delete(J, obj, node->left, name);
@@ -146,7 +153,7 @@ static js_Property *delete(js_State *J, js_Object *obj, js_Property *node, const
 	return node;
 }
 
-js_Object *jsV_newobject(js_State *J, enum js_Class type, js_Object *prototype)
+js_Object *jp_newobject(js_State *J, enum js_Class type, js_Object *prototype)
 {
 	js_Object *obj = js_malloc(J, sizeof *obj);
 	memset(obj, 0, sizeof *obj);
@@ -162,16 +169,18 @@ js_Object *jsV_newobject(js_State *J, enum js_Class type, js_Object *prototype)
 	return obj;
 }
 
-js_Property *jsV_getownproperty(js_State *J, js_Object *obj, const char *name)
+
+
+js_Property *jp_getownproperty(js_State *J, js_Object *obj, const char *name)
 {
-	return lookup(obj->properties, name);
+	return find_obj_prop(obj, name);
 }
 
-js_Property *jsV_getpropertyx(js_State *J, js_Object *obj, const char *name, int *own)
+js_Property *jp_getpropertyx(js_State *J, js_Object *obj, const char *name, int *own)
 {
 	*own = 1;
 	do {
-		js_Property *ref = lookup(obj->properties, name);
+		js_Property *ref = find_obj_prop(obj, name);
 		if (ref)
 			return ref;
 		obj = obj->prototype;
@@ -180,21 +189,16 @@ js_Property *jsV_getpropertyx(js_State *J, js_Object *obj, const char *name, int
 	return NULL;
 }
 
-js_Property *jsV_getproperty(js_State *J, js_Object *obj, const char *name)
+js_Property *jp_getproperty(js_State *J, js_Object *obj, const char *name)
 {
-	do {
-		js_Property *ref = lookup(obj->properties, name);
-		if (ref)
-			return ref;
-		obj = obj->prototype;
-	} while (obj);
-	return NULL;
+    int own ;
+    return jp_getpropertyx(J,obj,name,&own);
 }
 
-static js_Property *jsV_getenumproperty(js_State *J, js_Object *obj, const char *name)
+static js_Property *jp_getenumproperty(js_State *J, js_Object *obj, const char *name)
 {
 	do {
-		js_Property *ref = lookup(obj->properties, name);
+		js_Property *ref = find_obj_prop(obj, name);
 		if (ref && !(ref->atts & JS_DONTENUM))
 			return ref;
 		obj = obj->prototype;
@@ -202,12 +206,12 @@ static js_Property *jsV_getenumproperty(js_State *J, js_Object *obj, const char 
 	return NULL;
 }
 
-js_Property *jsV_setproperty(js_State *J, js_Object *obj, const char *name)
+js_Property *jp_setproperty(js_State *J, js_Object *obj, const char *name)
 {
 	js_Property *result;
 
 	if (!obj->extensible) {
-		result = lookup(obj->properties, name);
+		result = find_obj_prop(obj, name);
 		if (J->strict && !result)
 			js_error_type(J, "object is non-extensible");
 		return result;
@@ -218,7 +222,7 @@ js_Property *jsV_setproperty(js_State *J, js_Object *obj, const char *name)
 	return result;
 }
 
-void jsV_delproperty(js_State *J, js_Object *obj, const char *name)
+void jp_delproperty(js_State *J, js_Object *obj, const char *name)
 {
 	obj->properties = delete(J, obj, obj->properties, name);
 }
@@ -230,7 +234,7 @@ static js_Iterator *itwalk(js_State *J, js_Iterator *iter, js_Property *prop, js
 	if (prop->right != &sentinel)
 		iter = itwalk(J, iter, prop->right, seen);
 	if (!(prop->atts & JS_DONTENUM)) {
-		if (!seen || !jsV_getenumproperty(J, seen, prop->name)) {
+		if (!seen || !jp_getenumproperty(J, seen, prop->name)) {
 			js_Iterator *head = js_malloc(J, sizeof *head);
 			head->name = prop->name;
 			head->next = iter;
@@ -247,7 +251,7 @@ static js_Iterator *itflatten(js_State *J, js_Object *obj)
 	js_Iterator *iter = NULL;
 	if (obj->prototype)
 		iter = itflatten(J, obj->prototype);
-	if (obj->properties != &sentinel)
+	if (CHECK_PROP(obj->properties))
 		iter = itwalk(J, iter, obj->properties, obj->prototype);
 	return iter;
 }
@@ -256,11 +260,11 @@ js_Object *jsV_newiterator(js_State *J, js_Object *obj, int own)
 {
 	char buf[32];
 	int k;
-	js_Object *io = jsV_newobject(J, JS_CITERATOR, NULL);
+	js_Object *io = js_newobject(J, JS_CITERATOR, NULL);
 	io->u.iter.target = obj;
 	if (own) {
 		io->u.iter.head = NULL;
-		if (obj->properties != &sentinel)
+		if (CHECK_PROP(obj->properties))
 			io->u.iter.head = itwalk(J, io->u.iter.head, obj->properties, NULL);
 	} else {
 		io->u.iter.head = itflatten(J, obj);
@@ -272,7 +276,7 @@ js_Object *jsV_newiterator(js_State *J, js_Object *obj, int own)
 				tail = tail->next;
 		for (k = 0; k < obj->u.s.length; ++k) {
 			js_itoa(buf, k);
-			if (!jsV_getenumproperty(J, obj, buf)) {
+			if (!jp_getenumproperty(J, obj, buf)) {
 				js_Iterator *node = js_malloc(J, sizeof *node);
 				node->name = js_intern(J, js_itoa(buf, k));
 				node->next = NULL;
@@ -298,7 +302,7 @@ const char *jsV_nextiterator(js_State *J, js_Object *io)
 		const char *name = io->u.iter.head->name;
 		js_free(J, io->u.iter.head);
 		io->u.iter.head = next;
-		if (jsV_getproperty(J, io->u.iter.target, name))
+		if (jp_getproperty(J, io->u.iter.target, name))
 			return name;
 		if (io->u.iter.target->type == JS_CSTRING)
 			if (js_is_arr_index(J, name, &k) && k < io->u.iter.target->u.s.length)
@@ -318,13 +322,13 @@ void jsV_resizearray(js_State *J, js_Object *obj, int newlen)
 		if (obj->u.a.length > obj->count * 2) {
 			js_Object *it = jsV_newiterator(J, obj, 1);
 			while ((s = jsV_nextiterator(J, it))) {
-				k = jsV_ntoi(jsV_ston(J, s));
-				if (k >= newlen && !strcmp(s, jsV_ntos(J, buf, k)))
-					jsV_delproperty(J, obj, s);
+				k = js_ntoi(jv_ston(J, s));
+				if (k >= newlen && !strcmp(s, jv_ntos(J, buf, k)))
+					jp_delproperty(J, obj, s);
 			}
 		} else {
 			for (k = newlen; k < obj->u.a.length; ++k) {
-				jsV_delproperty(J, obj, js_itoa(buf, k));
+				jp_delproperty(J, obj, js_itoa(buf, k));
 			}
 		}
 	}

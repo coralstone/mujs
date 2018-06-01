@@ -10,7 +10,7 @@ void js_new_regexp(js_State *J, const char *pattern, int flags)
 	Reprog *prog;
 	int opts;
 
-	obj = jsV_newobject(J, JS_CREGEXP, J->RegExp_prototype);
+	obj = js_newobject(J, JS_CREGEXP, J->RegExp_prototype);
 
 	opts = 0;
 	if (flags & JS_REGEXP_I) opts |= REG_ICASE;
@@ -190,5 +190,5 @@ void jb_initregexp(js_State *J)
 		jb_prop_func(J, "RegExp.prototype.exec", Rp_exec, 0);
 	}
 	js_new_cctor(J, jsB_RegExp, jsB_new_RegExp, "RegExp", 1);
-	js_defglobal(J, "RegExp", JS_DONTENUM);
+	js_def_global(J, "RegExp", JS_DONTENUM);
 }

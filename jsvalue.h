@@ -144,35 +144,41 @@ js_Value *js_tovalue(js_State *J, int idx);
 
 js_String *jsV_newmemstring(js_State *J, const char *s, int n);
 
-void js_toprimitive(js_State *J, int idx, int hint);
+void       js_toprimitive(js_State *J, int idx, int hint);
 js_Object *js_toobject(js_State *J, int idx);
-void js_pushvalue(js_State *J, js_Value v);
-void js_push_object(js_State *J, js_Object *v);
+void       js_pushvalue(js_State *J, js_Value v);
+void       js_push_object(js_State *J, js_Object *v);
 
 /* jsvalue.c */
-int    jsV_toboolean(js_State *J, js_Value *v);
-double jsV_tonumber(js_State *J, js_Value *v);
-double jsV_tointeger(js_State *J, js_Value *v);
-const char *jsV_tostring(js_State *J, js_Value *v);
-js_Object *jsV_toobject(js_State *J, js_Value *v);
-void jsV_toprimitive(js_State *J, js_Value *v, int preferred);
+int         jv_toboolean(js_State *J, js_Value *v);
+double      jv_tonumber(js_State *J, js_Value *v);
+int         jv_tointeger(js_State *J, js_Value *v);
+const char *jv_tostring(js_State *J, js_Value *v);
+js_Object * jv_toobject(js_State *J, js_Value *v);
+void        jv_toprimitive(js_State *J, js_Value *v, int preferred);
+
+const char *jv_ntos(js_State *J, char buf[32], double n);
+double      jv_ston(js_State *J, const char *str);
 
 const char *js_itoa(char buf[32], int a);
-double js_stof(const char *s, char **ep);
-int jsV_ntoi(double n);
-int jsV_ntoi32(double n);
-const char *jsV_ntos(js_State *J, char buf[32], double n);
-double jsV_ston(js_State *J, const char *str);
+double      js_atod(const char *s, char **ep);
+int         js_ntoi(double);
+int         js_noti32(double);
+
 
 /* jsproperty.c */
-js_Object   *jsV_newobject(js_State *J, enum js_Class type, js_Object *prototype);
+js_Object   *jp_newobject(js_State *J, enum js_Class type, js_Object *prototype);
+#define js_newobject jp_newobject
+
+/*
 js_Property *jsV_getownproperty(js_State *J, js_Object *obj, const char *name);
 js_Property *jsV_getpropertyx(js_State *J, js_Object *obj, const char *name, int *own);
 js_Property *jsV_getproperty(js_State *J, js_Object *obj, const char *name);
 js_Property *jsV_setproperty(js_State *J, js_Object *obj, const char *name);
 js_Property *jsV_nextproperty(js_State *J, js_Object *obj, const char *name);
-void jsV_delproperty(js_State *J, js_Object *obj, const char *name);
 
+void jsV_delproperty(js_State *J, js_Object *obj, const char *name);
+*/
 js_Object  *jsV_newiterator(js_State *J, js_Object *obj, int own);
 const char *jsV_nextiterator(js_State *J, js_Object *iter);
 

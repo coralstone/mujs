@@ -141,7 +141,7 @@ static void Math_min(js_State *J)
 
 void jb_initmath(js_State *J)
 {
-	js_push_object(J, jsV_newobject(J, JS_CMATH, J->Object_prototype));
+	js_push_object(J, js_newobject(J, JS_CMATH, J->Object_prototype));
 	{
 		jb_prop_num(J, "E", 2.7182818284590452354);
 		jb_prop_num(J, "LN10", 2.302585092994046);
@@ -171,5 +171,5 @@ void jb_initmath(js_State *J)
 		jb_prop_func(J, "Math.sqrt", Math_sqrt, 1);
 		jb_prop_func(J, "Math.tan", Math_tan, 1);
 	}
-	js_defglobal(J, "Math", JS_DONTENUM);
+	js_def_global(J, "Math", JS_DONTENUM);
 }

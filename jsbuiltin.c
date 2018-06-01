@@ -7,7 +7,7 @@
 
 void js_cfunction(js_State *J, js_CFunction cfun, const char *name, int length)
 {
-	js_Object *obj = jsV_newobject(J, JS_CCFUNCTION, J->Function_prototype);
+	js_Object *obj = js_newobject(J, JS_CCFUNCTION, J->Function_prototype);
 	obj->u.c.name = name;
 	obj->u.c.function = cfun;
 	obj->u.c.constructor = NULL;
@@ -28,7 +28,7 @@ void js_cfunction(js_State *J, js_CFunction cfun, const char *name, int length)
 /* prototype -- constructor */
 void js_new_cctor(js_State *J, js_CFunction cfun, js_CFunction ccon, const char *name, int length)
 {
-	js_Object *obj = jsV_newobject(J, JS_CCFUNCTION, J->Function_prototype);
+	js_Object *obj = js_newobject(J, JS_CCFUNCTION, J->Function_prototype);
 	obj->u.c.name = name;
 	obj->u.c.function = cfun;
 	obj->u.c.constructor = ccon;
@@ -47,7 +47,7 @@ void js_new_cctor(js_State *J, js_CFunction cfun, js_CFunction ccon, const char 
 static void jb_global_func(js_State *J, const char *name, js_CFunction cfun, int n)
 {
 	js_cfunction(J, cfun, name, n);
-	js_defglobal(J, name, JS_DONTENUM);
+	js_def_global(J, name, JS_DONTENUM);
 }
 
 void jb_prop_func(js_State *J, const char *name, js_CFunction cfun, int n)
@@ -117,7 +117,7 @@ static void jsB_parseFloat(js_State *J)
 	else if (!strncmp(s, "-Infinity", 9))
 		js_push_number(J, -INFINITY);
 	else {
-		n = js_stof(s, &e);
+		n = js_atod(s, &e);
 		if (e == s)
 			n = NAN;
 
@@ -232,23 +232,23 @@ static void jsB_encodeURIComponent(js_State *J)
 void jb_init(js_State *J)
 {
 	/* Create the prototype objects here, before the constructors */
-	J->Object_prototype   = jsV_newobject(J, JS_COBJECT, NULL);
-	J->Array_prototype    = jsV_newobject(J, JS_CARRAY, J->Object_prototype);
-	J->Function_prototype = jsV_newobject(J, JS_CCFUNCTION, J->Object_prototype);
-	J->Boolean_prototype  = jsV_newobject(J, JS_CBOOLEAN, J->Object_prototype);
-	J->Number_prototype   = jsV_newobject(J, JS_CNUMBER, J->Object_prototype);
-	J->String_prototype   = jsV_newobject(J, JS_CSTRING, J->Object_prototype);
-	J->RegExp_prototype   = jsV_newobject(J, JS_COBJECT, J->Object_prototype);
-	J->Date_prototype     = jsV_newobject(J, JS_CDATE, J->Object_prototype);
+	J->Object_prototype   = js_newobject(J, JS_COBJECT, NULL);
+	J->Array_prototype    = js_newobject(J, JS_CARRAY, J->Object_prototype);
+	J->Function_prototype = js_newobject(J, JS_CCFUNCTION, J->Object_prototype);
+	J->Boolean_prototype  = js_newobject(J, JS_CBOOLEAN, J->Object_prototype);
+	J->Number_prototype   = js_newobject(J, JS_CNUMBER, J->Object_prototype);
+	J->String_prototype   = js_newobject(J, JS_CSTRING, J->Object_prototype);
+	J->RegExp_prototype   = js_newobject(J, JS_COBJECT, J->Object_prototype);
+	J->Date_prototype     = js_newobject(J, JS_CDATE, J->Object_prototype);
 
 	/* All the native error types */
-	J->Error_prototype      = jsV_newobject(J, JS_CERROR, J->Object_prototype);
-	J->EvalError_prototype  = jsV_newobject(J, JS_CERROR, J->Error_prototype);
-	J->RangeError_prototype = jsV_newobject(J, JS_CERROR, J->Error_prototype);
-	J->ReferenceError_prototype = jsV_newobject(J, JS_CERROR, J->Error_prototype);
-	J->SyntaxError_prototype    = jsV_newobject(J, JS_CERROR, J->Error_prototype);
-	J->TypeError_prototype      = jsV_newobject(J, JS_CERROR, J->Error_prototype);
-	J->URIError_prototype       = jsV_newobject(J, JS_CERROR, J->Error_prototype);
+	J->Error_prototype      = js_newobject(J, JS_CERROR, J->Object_prototype);
+	J->EvalError_prototype  = js_newobject(J, JS_CERROR, J->Error_prototype);
+	J->RangeError_prototype = js_newobject(J, JS_CERROR, J->Error_prototype);
+	J->ReferenceError_prototype = js_newobject(J, JS_CERROR, J->Error_prototype);
+	J->SyntaxError_prototype    = js_newobject(J, JS_CERROR, J->Error_prototype);
+	J->TypeError_prototype      = js_newobject(J, JS_CERROR, J->Error_prototype);
+	J->URIError_prototype       = js_newobject(J, JS_CERROR, J->Error_prototype);
 
 	/* Create the constructors and fill out the prototype objects */
 	jb_initobject(J);
@@ -265,13 +265,13 @@ void jb_init(js_State *J)
 
 	/* Initialize the global object */
 	js_push_number(J, NAN);
-	js_defglobal(J, "NaN", JS_READONLY | JS_DONTENUM | JS_DONTCONF);
+	js_def_global(J, "NaN", JS_READONLY | JS_DONTENUM | JS_DONTCONF);
 
 	js_push_number(J, INFINITY);
-	js_defglobal(J, "Infinity", JS_READONLY | JS_DONTENUM | JS_DONTCONF);
+	js_def_global(J, "Infinity", JS_READONLY | JS_DONTENUM | JS_DONTCONF);
 
 	js_push_undef(J);
-	js_defglobal(J, "undefined", JS_READONLY | JS_DONTENUM | JS_DONTCONF);
+	js_def_global(J, "undefined", JS_READONLY | JS_DONTENUM | JS_DONTCONF);
 
 	jb_global_func(J, "parseInt", jsB_parseInt, 1);
 	jb_global_func(J, "parseFloat", jsB_parseFloat, 1);

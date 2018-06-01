@@ -439,7 +439,7 @@ static void D_new_date(js_State *J)
 		t = TimeClip(UTC(t));
 	}
 
-	obj = jsV_newobject(J, JS_CDATE, J->Date_prototype);
+	obj = js_newobject(J, JS_CDATE, J->Date_prototype);
 	obj->u.number = t;
 
 	js_push_object(J, obj);
@@ -809,5 +809,5 @@ void jb_initdate(js_State *J)
 		/* ES5 */
 		jb_prop_func(J, "Date.now", D_now, 0);
 	}
-	js_defglobal(J, "Date", JS_DONTENUM);
+	js_def_global(J, "Date", JS_DONTENUM);
 }

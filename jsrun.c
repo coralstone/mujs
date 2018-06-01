@@ -10,8 +10,8 @@ static void jsR_run(js_State *J, js_Function *F);
 /* Push values on stack */
 
 #define STACK (J->stack)
-#define TOP (J->top)
-#define BOT (J->bot)
+#define TOP   (J->top)
+#define BOT   (J->bot)
 
 static void js_stackoverflow(js_State *J)
 {
@@ -245,22 +245,22 @@ static const char *js_typeof(js_State *J, int idx)
 
 int js_toboolean(js_State *J, int idx)
 {
-	return jsV_toboolean(J, stackidx(J, idx));
+	return jv_toboolean(J, stackidx(J, idx));
 }
 
 double js_tonumber(js_State *J, int idx)
 {
-	return jsV_tonumber(J, stackidx(J, idx));
+	return jv_tonumber(J, stackidx(J, idx));
 }
 
 int js_tointeger(js_State *J, int idx)
 {
-	return jsV_ntoi(jsV_tonumber(J, stackidx(J, idx)));
+	return jv_tointeger(J, stackidx(J, idx));
 }
 
 int js_toi32(js_State *J, int idx)
 {
-	return jsV_ntoi32(jsV_tonumber(J, stackidx(J, idx)));
+	return js_ntoi32(js_tonumber(J, idx));
 }
 
 unsigned int js_tou32(js_State *J, int idx)
@@ -281,17 +281,17 @@ unsigned short js_touint16(js_State *J, int idx)
 
 const char *js_tostring(js_State *J, int idx)
 {
-	return jsV_tostring(J, stackidx(J, idx));
+	return jv_tostring(J, stackidx(J, idx));
 }
 
 js_Object *js_toobject(js_State *J, int idx)
 {
-	return jsV_toobject(J, stackidx(J, idx));
+	return jv_toobject(J, stackidx(J, idx));
 }
 
 void js_toprimitive(js_State *J, int idx, int hint)
 {
-	jsV_toprimitive(J, stackidx(J, idx), hint);
+	jv_toprimitive(J, stackidx(J, idx), hint);
 }
 
 js_Regexp *js_toregexp(js_State *J, int idx)
@@ -515,7 +515,7 @@ static int jr_hasproperty(js_State *J, js_Object *obj, const char *name)
 			return 1;
 	}
 
-	ref = jsV_getproperty(J, obj, name);
+	ref = jp_getproperty(J, obj, name);
 	if (ref) {
 		if (ref->getter) {
 			js_push_object(J, ref->getter);
@@ -545,8 +545,8 @@ static void jr_setproperty(js_State *J, js_Object *obj, const char *name)
 
 	if (obj->type == JS_CARRAY) {
 		if (!strcmp(name, "length")) {
-			double rawlen = jsV_tonumber(J, value);
-			int newlen = jsV_ntoi(rawlen);
+			double rawlen = jv_tonumber(J, value);
+			int newlen = js_ntoi(rawlen);
 			if (newlen != rawlen || newlen < 0)
 				js_error_range(J, "array length");
 			jsV_resizearray(J, obj, newlen);
@@ -571,7 +571,7 @@ static void jr_setproperty(js_State *J, js_Object *obj, const char *name)
 		if (!strcmp(name, "ignoreCase")) goto readonly;
 		if (!strcmp(name, "multiline")) goto readonly;
 		if (!strcmp(name, "lastIndex")) {
-			obj->u.r.last = jsV_tointeger(J, value);
+			obj->u.r.last = jv_tointeger(J, value);
 			return;
 		}
 	}
@@ -582,7 +582,7 @@ static void jr_setproperty(js_State *J, js_Object *obj, const char *name)
 	}
 
 	/* First try to find a setter in prototype chain */
-	ref = jsV_getpropertyx(J, obj, name, &own);
+	ref = jp_getpropertyx(J, obj, name, &own);
 	if (ref) {
 		if (ref->setter) {
 			js_push_object(J, ref->setter);
@@ -600,7 +600,7 @@ static void jr_setproperty(js_State *J, js_Object *obj, const char *name)
 
 	/* Property not found on this object, so create one */
 	if (!ref || !own)
-		ref = jsV_setproperty(J, obj, name);
+		ref = jp_setproperty(J, obj, name);
 
 	if (ref) {
 		if (!(ref->atts & JS_READONLY))
@@ -648,7 +648,7 @@ static void jr_defproperty(js_State *J, js_Object *obj, const char *name,
 			return;
 	}
 
-	ref = jsV_setproperty(J, obj, name);
+	ref = jp_setproperty(J, obj, name);
 	if (ref) {
 		if (value) {
 			if (!(ref->atts & JS_READONLY))
@@ -709,11 +709,11 @@ static int jr_delproperty(js_State *J, js_Object *obj, const char *name)
 			return 1;
 	}
 
-	ref = jsV_getownproperty(J, obj, name);
+	ref = jp_getownproperty(J, obj, name);
 	if (ref) {
 		if (ref->atts & JS_DONTCONF)
 			goto dontconf;
-		jsV_delproperty(J, obj, name);
+		jp_delproperty(J, obj, name);
 	}
 	return 1;
 
@@ -770,18 +770,18 @@ void js_del_registry(js_State *J, const char *name)
 	jr_delproperty(J, J->R, name);
 }
 
-void js_getglobal(js_State *J, const char *name)
+void js_get_global(js_State *J, const char *name)
 {
 	jr_getproperty(J, J->G, name);
 }
 
-void js_setglobal(js_State *J, const char *name)
+void js_set_global(js_State *J, const char *name)
 {
 	jr_setproperty(J, J->G, name);
 	js_pop(J, 1);
 }
 
-void js_defglobal(js_State *J, const char *name, int atts)
+void js_def_global(js_State *J, const char *name, int atts)
 {
 	jr_defproperty(J, J->G, name, atts, stackidx(J, -1), NULL, NULL);
 	js_pop(J, 1);
@@ -861,7 +861,7 @@ static int js_hasvar(js_State *J, const char *name)
 {
 	js_Env *E = J->E;
 	do {
-		js_Property *ref = jsV_getproperty(J, E->variables, name);
+		js_Property *ref = jp_getproperty(J, E->variables, name);
 		if (ref) {
 			if (ref->getter) {
 				js_push_object(J, ref->getter);
@@ -881,7 +881,7 @@ static void js_setvar(js_State *J, const char *name)
 {
 	js_Env *E = J->E;
 	do {
-		js_Property *ref = jsV_getproperty(J, E->variables, name);
+		js_Property *ref = jp_getproperty(J, E->variables, name);
 		if (ref) {
 			if (ref->setter) {
 				js_push_object(J, ref->setter);
@@ -908,14 +908,14 @@ static int js_delvar(js_State *J, const char *name)
 {
 	js_Env *E = J->E;
 	do {
-		js_Property *ref = jsV_getownproperty(J, E->variables, name);
+		js_Property *ref = jp_getownproperty(J, E->variables, name);
 		if (ref) {
 			if (ref->atts & JS_DONTCONF) {
 				if (J->strict)
 					js_error_type(J, "'%s' is non-configurable", name);
 				return 0;
 			}
-			jsV_delproperty(J, E->variables, name);
+			jp_delproperty(J, E->variables, name);
 			return 1;
 		}
 		E = E->outer;
@@ -965,7 +965,7 @@ static void jsR_callfunction(js_State *J, int n, js_Function *F, js_Env *scope)
 	js_Value v;
 	int i;
 
-	scope = jsR_newenvironment(J, jsV_newobject(J, JS_COBJECT, NULL), scope);
+	scope = jsR_newenvironment(J, js_newobject(J, JS_COBJECT, NULL), scope);
 
 	jsR_savescope(J, scope);
 
@@ -1114,7 +1114,7 @@ void js_construct(js_State *J, int n)
 	js_pop(J, 1);
 
 	/* create a new object with above prototype, and shift it into the 'this' slot */
-	newobj = jsV_newobject(J, JS_COBJECT, prototype);
+	newobj = js_newobject(J, JS_COBJECT, prototype);
 	js_push_object(J, newobj);
 	if (n > 0)
 		js_rot(J, n + 1);
@@ -1690,7 +1690,7 @@ static void jsR_run(js_State *J, js_Function *F)
 
 		case OP_CATCH:
 			str = ST[*pc++];
-			obj = jsV_newobject(J, JS_COBJECT, NULL);
+			obj = js_newobject(J, JS_COBJECT, NULL);
 			js_push_object(J, obj);
 			js_rot2(J);
 			js_set_prop(J, -2, str);

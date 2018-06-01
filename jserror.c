@@ -57,7 +57,7 @@ static void Ep_toString(js_State *J)
 static int jsB_ErrorX(js_State *J, js_Object *prototype)
 {
 	int top = js_gettop(J);
-	js_push_object(J, jsV_newobject(J, JS_CERROR, prototype));
+	js_push_object(J, js_newobject(J, JS_CERROR, prototype));
 	if (top > 1) {
 		js_push_string(J, js_tostring(J, 1));
 		js_set_prop(J, -2, "message");
@@ -69,7 +69,7 @@ static int jsB_ErrorX(js_State *J, js_Object *prototype)
 
 static void js_newerrorx(js_State *J, const char *message, js_Object *prototype)
 {
-	js_push_object(J, jsV_newobject(J, JS_CERROR, prototype));
+	js_push_object(J, js_newobject(J, JS_CERROR, prototype));
 	js_push_string(J, message);
 	js_set_prop(J, -2, "message");
 	if (jsB_stacktrace(J, 0))
@@ -112,13 +112,13 @@ void jb_initerror(js_State *J)
 			jb_prop_func(J, "Error.prototype.toString", Ep_toString, 0);
 	}
 	js_new_cctor(J, jsB_Error, jsB_Error, "Error", 1);
-	js_defglobal(J, "Error", JS_DONTENUM);
+	js_def_global(J, "Error", JS_DONTENUM);
 
 	#define IERROR(NAME) \
 		js_push_object(J, J->NAME##_prototype); \
 		jb_prop_str(J, "name", Q(NAME)); \
 		js_new_cctor(J, jsB_##NAME, jsB_##NAME, Q(NAME), 1); \
-		js_defglobal(J, Q(NAME), JS_DONTENUM);
+		js_def_global(J, Q(NAME), JS_DONTENUM);
 
 	IERROR(EvalError);
 	IERROR(RangeError);

@@ -222,5 +222,5 @@ void jb_initfunction(js_State *J)
 		jb_prop_func(J, "Function.prototype.bind", Fp_bind, 1);
 	}
 	js_new_cctor(J, Fp_Function,Fp_Function, "Function", 1);
-	js_defglobal(J, "Function", JS_DONTENUM);
+	js_def_global(J, "Function", JS_DONTENUM);
 }

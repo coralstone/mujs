@@ -304,7 +304,7 @@ static void checkdup(JF, js_Ast *list, js_Ast *end)
 	const char *needle, *straw;
 
 	if (end->a->type == EXP_NUMBER)
-		needle = jsV_ntos(J, nbuf, end->a->number);
+		needle = jv_ntos(J, nbuf, end->a->number);
 	else
 		needle = end->a->string;
 
@@ -312,7 +312,7 @@ static void checkdup(JF, js_Ast *list, js_Ast *end)
 		if (list->a->type == end->type) {
 			js_Ast *prop = list->a->a;
 			if (prop->type == EXP_NUMBER)
-				straw = jsV_ntos(J, sbuf, prop->number);
+				straw = jv_ntos(J, sbuf, prop->number);
 			else
 				straw =  prop->string;
 			if (!strcmp(needle, straw))

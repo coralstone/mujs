@@ -213,7 +213,7 @@ js_State *js_newstate(js_Alloc alloc, void *actx, int flags)
 	if (!J)
 		return NULL;
 	memset(J, 0, sizeof(*J));
-	J->actx = actx;
+	J->actx  = actx;
 	J->alloc = alloc;
 
 	if (flags & JS_STRICT)
@@ -224,7 +224,7 @@ js_State *js_newstate(js_Alloc alloc, void *actx, int flags)
 	J->trace[0].line = 0;
 
 	J->report = js_defaultreport;
-	J->panic = js_defaultpanic;
+	J->panic  = js_defaultpanic;
 
 	J->stack = alloc(actx, NULL, JS_STACKSIZE * sizeof *J->stack);
 	if (!J->stack) {
@@ -235,8 +235,8 @@ js_State *js_newstate(js_Alloc alloc, void *actx, int flags)
 	J->gcmark = 1;
 	J->nextref = 0;
 
-	J->R = jsV_newobject(J, JS_COBJECT, NULL);
-	J->G = jsV_newobject(J, JS_COBJECT, NULL);
+	J->R = js_newobject(J, JS_COBJECT, NULL);
+	J->G = js_newobject(J, JS_COBJECT, NULL);
 	J->E = jsR_newenvironment(J, J->G, NULL);
 	J->GE = J->E;
 

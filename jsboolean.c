@@ -38,5 +38,5 @@ void jb_initboolean(js_State *J)
 		jb_prop_func(J, "Boolean.prototype.valueOf", Bp_valueOf, 0);
 	}
 	js_new_cctor(J, Bp_Boolean, Bp_new_Boolean, "Boolean", 1);
-	js_defglobal(J, "Boolean", JS_DONTENUM);
+	js_def_global(J, "Boolean", JS_DONTENUM);
 }

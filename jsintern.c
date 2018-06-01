@@ -38,19 +38,20 @@ struct js_StringNode
 	char string[1];
 };
 
-static js_StringNode jsS_sentinel = { &jsS_sentinel, &jsS_sentinel, 0, ""};
+#define CHECK_STR_NODE(node) (node && node != &jstr_null)
+static js_StringNode jstr_null = { &jstr_null, &jstr_null, 0, ""};
 
-static js_StringNode *jsS_newstringnode(js_State *J, const char *string, const char **result)
+static js_StringNode *jn_newstring(js_State *J, const char *string, const char **result)
 {
 	int n = strlen(string);
 	js_StringNode *node = js_malloc(J, soffsetof(js_StringNode, string) + n + 1);
-	node->left = node->right = &jsS_sentinel;
+	node->left = node->right = &jstr_null;
 	node->level = 1;
 	memcpy(node->string, string, n + 1);
 	return *result = node->string, node;
 }
 
-static js_StringNode *jsS_skew(js_StringNode *node)
+static js_StringNode *jn_skew(js_StringNode *node)
 {
 	if (node->left->level == node->level) {
 		js_StringNode *temp = node;
@@ -61,7 +62,7 @@ static js_StringNode *jsS_skew(js_StringNode *node)
 	return node;
 }
 
-static js_StringNode *jsS_split(js_StringNode *node)
+static js_StringNode *jn_split(js_StringNode *node)
 {
 	if (node->right->right->level == node->level) {
 		js_StringNode *temp = node;
@@ -73,33 +74,34 @@ static js_StringNode *jsS_split(js_StringNode *node)
 	return node;
 }
 
-static js_StringNode *jsS_insert(js_State *J, js_StringNode *node, const char *string, const char **result)
+static js_StringNode *jn_insert(js_State *J, js_StringNode *node, const char *string, const char **result)
 {
-	if (node != &jsS_sentinel) {
+	if (CHECK_STR_NODE(node)) {
 		int c = strcmp(string, node->string);
 		if (c < 0)
-			node->left = jsS_insert(J, node->left, string, result);
+			node->left  = jn_insert(J, node->left, string, result);
 		else if (c > 0)
-			node->right = jsS_insert(J, node->right, string, result);
+			node->right = jn_insert(J, node->right, string, result);
 		else
 			return *result = node->string, node;
-		node = jsS_skew(node);
-		node = jsS_split(node);
+		node = jn_skew(node);
+		node = jn_split(node);
 		return node;
 	}
-	return jsS_newstringnode(J, string, result);
+	return jn_newstring(J, string, result);
 }
 
 static void dump_node(js_StringNode *node, int level)
 {
-	int i;
-	if (node->left != &jsS_sentinel)
+    int i;
+	if (CHECK_STR_NODE(node->left))
 		dump_node(node->left, level + 1);
 	printf("%d: ", node->level);
 	for (i = 0; i < level; ++i)
 		putchar('\t');
 	printf("'%s'\n", node->string);
-	if (node->right != &jsS_sentinel)
+
+	if (CHECK_STR_NODE(node->right))
 		dump_node(node->right, level + 1);
 }
 
@@ -107,21 +109,23 @@ void jn_dumpstrings(js_State *J)
 {
 	js_StringNode *root = J->strings;
 	printf("interned strings {\n");
-	if (root && root != &jsS_sentinel)
+	if (CHECK_STR_NODE(root))
 		dump_node(root, 1);
 	printf("}\n");
 }
 
 static void jn_free_str_node(js_State *J, js_StringNode *node)
 {
-	if (node->left != &jsS_sentinel) jn_free_str_node(J, node->left);
-	if (node->right != &jsS_sentinel) jn_free_str_node(J, node->right);
+	if (CHECK_STR_NODE(node->left))
+        jn_free_str_node(J, node->left);
+	if (CHECK_STR_NODE(node->right))
+	    jn_free_str_node(J, node->right);
 	js_free(J, node);
 }
 
 void jn_free_strings(js_State *J)
 {
-	if (J->strings && J->strings != &jsS_sentinel)
+	if (CHECK_STR_NODE(J->strings))
 		jn_free_str_node(J, J->strings);
 }
 
@@ -129,7 +133,7 @@ const char *js_intern(js_State *J, const char *s)
 {
 	const char *result;
 	if (!J->strings)
-		J->strings = &jsS_sentinel;
-	J->strings = jsS_insert(J, J->strings, s, &result);
+		 J->strings = &jstr_null;
+	J->strings = jn_insert(J, J->strings, s, &result);
 	return result;
 }

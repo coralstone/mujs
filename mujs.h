@@ -139,9 +139,9 @@ void js_get_registry(js_State *J, const char *name);
 void js_set_registry(js_State *J, const char *name);
 void js_del_registry(js_State *J, const char *name);
 
-void js_getglobal(js_State *J, const char *name);
-void js_setglobal(js_State *J, const char *name);
-void js_defglobal(js_State *J, const char *name, int atts);
+void js_get_global(js_State *J, const char *name);
+void js_set_global(js_State *J, const char *name);
+void js_def_global(js_State *J, const char *name, int atts);
 
 int  js_has_prop(js_State *J, int idx, const char *name);
 void js_get_prop(js_State *J, int idx, const char *name);
@@ -180,7 +180,7 @@ void js_new_regexp(js_State *J, const char *pattern, int flags);
 
 
 void js_new_user_data(js_State *J, const char *tag, void *data, js_Finalize finalize);
-void js_new_user_datax(js_State *J, const char *tag, void *data, 
+void js_new_user_datax(js_State *J, const char *tag, void *data,
      js_HasProperty has, js_Put put, js_Delete del, js_Finalize finalize);
 
 
@@ -200,10 +200,10 @@ int js_is_coercible(js_State *J, int idx);
 int js_is_callable(js_State *J, int idx);
 int js_is_userdata(js_State *J, int idx, const char *tag);
 
-int js_tobool(js_State *J, int idx);
-double js_tonumber(js_State *J, int idx);
+int         js_tobool(js_State *J, int idx);
+double      js_tonumber(js_State *J, int idx);
 const char *js_tostring(js_State *J, int idx);
-void *js_touserdata(js_State *J, int idx, const char *tag);
+void *      js_touserdata(js_State *J, int idx, const char *tag);
 
 const char *js_trystring(js_State *J, int idx, const char *error);
 
