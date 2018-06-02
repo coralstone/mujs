@@ -116,7 +116,7 @@ static void O_getOwnPropertyDescriptor(js_State *J)
 	else {
 		js_new_object(J);
 		if (!ref->getter && !ref->setter) {
-			js_pushvalue(J, ref->value);
+			js_push_value(J, ref->value);
 			js_set_prop(J, -2, "value");
 			js_push_bool(J, !(ref->atts & JS_READONLY));
 			js_set_prop(J, -2, "writable");
@@ -261,7 +261,7 @@ static void O_defineProperties_walk(js_State *J, js_Property *ref)
 	if (ref->left->level)
 		O_defineProperties_walk(J, ref->left);
 	if (!(ref->atts & JS_DONTENUM)) {
-		js_pushvalue(J, ref->value);
+		js_push_value(J, ref->value);
 		ToPropertyDescriptor(J, js_toobject(J, 1), ref->name, js_toobject(J, -1));
 		js_pop(J, 1);
 	}

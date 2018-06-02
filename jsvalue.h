@@ -50,10 +50,10 @@ enum js_Class {
 struct js_Value
 {
 	union {
-		int boolean;
+		int    boolean;
 		double number;
-		char shrstr[8];
-		const char *litstr;
+		char   shrstr[8];
+		const  char *litstr;
 		js_String *memstr;
 		js_Object *object;
 	} u;
@@ -138,13 +138,10 @@ struct js_Iterator
 	js_Iterator *next;
 };
 
-/* jsrun.c */
 
-js_Value *js_tovalue(js_State *J, int idx);
-
-js_String *jsV_newmemstring(js_State *J, const char *s, int n);
 
 void       js_toprimitive(js_State *J, int idx, int hint);
+js_Value  *js_tovalue(js_State *J, int idx);
 js_Object *js_toobject(js_State *J, int idx);
 void       js_pushvalue(js_State *J, js_Value v);
 void       js_push_object(js_State *J, js_Object *v);
@@ -165,24 +162,14 @@ double      js_atod(const char *s, char **ep);
 int         js_ntoi(double);
 int         js_noti32(double);
 
-
+js_String   *jv_memstring(js_State *J, const char *s, int n);
 /* jsproperty.c */
 js_Object   *jp_newobject(js_State *J, enum js_Class type, js_Object *prototype);
 #define js_newobject jp_newobject
 
-/*
-js_Property *jsV_getownproperty(js_State *J, js_Object *obj, const char *name);
-js_Property *jsV_getpropertyx(js_State *J, js_Object *obj, const char *name, int *own);
-js_Property *jsV_getproperty(js_State *J, js_Object *obj, const char *name);
-js_Property *jsV_setproperty(js_State *J, js_Object *obj, const char *name);
-js_Property *jsV_nextproperty(js_State *J, js_Object *obj, const char *name);
-
-void jsV_delproperty(js_State *J, js_Object *obj, const char *name);
-*/
-js_Object  *jsV_newiterator(js_State *J, js_Object *obj, int own);
-const char *jsV_nextiterator(js_State *J, js_Object *iter);
-
-void jsV_resizearray(js_State *J, js_Object *obj, int newlen);
+js_Object  *jp_newiterator(js_State *J, js_Object *obj, int own);
+const char *jp_nextiterator(js_State *J, js_Object *iter);
+void        jp_resizearray(js_State *J, js_Object *obj, int newlen);
 
 /* jsdump.c */
 void js_dumpobject(js_State *J, js_Object *obj);

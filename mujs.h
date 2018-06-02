@@ -47,6 +47,7 @@ typedef unsigned int   uint;
 typedef unsigned short ushort;
 typedef unsigned long  ulong;
 typedef struct js_State js_State;
+typedef struct js_Value js_Value;
 
 typedef void*(*js_Alloc)(void *memctx, void *ptr, int size);
 typedef void (*js_Panic)(js_State *J);
@@ -102,15 +103,7 @@ enum {
 
 void js_report(js_State *J, const char *message);
 
-/*
-void js_newerror(js_State *J, const char *message);
-void js_newevalerror(js_State *J, const char *message);
-void js_newrangeerror(js_State *J, const char *message);
-void js_newreferenceerror(js_State *J, const char *message);
-void js_newerror_syntax(js_State *J, const char *message);
-void js_newtypeerror(js_State *J, const char *message);
-void js_newurierror(js_State *J, const char *message);
-*/
+
 
 JS_NORETURN void js_error(js_State *J, const char *fmt, ...)       JS_PRINTFLIKE(2,3);
 JS_NORETURN void js_error_eval(js_State *J, const char *fmt, ...)  JS_PRINTFLIKE(2,3);
@@ -167,7 +160,7 @@ void js_push_string(js_State *J, const char *v);
 void js_push_lstr(js_State *J, const char *v, int len);
 void js_push_literal(js_State *J, const char *v);
 
-void js_push_iterator(js_State *J, int idx, int own);
+void        js_push_iterator(js_State *J, int idx, int own);
 const char *js_next_iterator(js_State *J, int idx);
 
 void js_new_objectx(js_State *J);
@@ -210,8 +203,6 @@ const char *js_trystring(js_State *J, int idx, const char *error);
 //int   js_tointeger(js_State *J, int idx);
 int   js_toi32(js_State *J, int idx);
 uint  js_tou32(js_State *J, int idx);
-//short js_toint16(js_State *J, int idx);
-//ushort js_touint16(js_State *J, int idx);
 
 int  js_gettop(js_State *J);
 void js_settop(js_State *J, int idx);

@@ -717,7 +717,7 @@ void jsP_dumplist(js_State *J, js_Ast *prog)
 
 /* Compiled code */
 
-void jsC_dumpfunction(js_State *J, js_Function *F)
+void jc_dump_function(js_State *J, js_Function *F)
 {
 	js_Instruction *p = F->code;
 	js_Instruction *end = F->code + F->codelen;
@@ -793,7 +793,7 @@ void jsC_dumpfunction(js_State *J, js_Function *F)
 	for (i = 0; i < F->funlen; ++i) {
 		if (F->funtab[i] != F) {
 			printf("function %d ", i);
-			jsC_dumpfunction(J, F->funtab[i]);
+			jc_dump_function(J, F->funtab[i]);
 		}
 	}
 }

@@ -256,7 +256,7 @@ static js_Iterator *itflatten(js_State *J, js_Object *obj)
 	return iter;
 }
 
-js_Object *jsV_newiterator(js_State *J, js_Object *obj, int own)
+js_Object *jp_newiterator(js_State *J, js_Object *obj, int own)
 {
 	char buf[32];
 	int k;
@@ -292,7 +292,7 @@ js_Object *jsV_newiterator(js_State *J, js_Object *obj, int own)
 	return io;
 }
 
-const char *jsV_nextiterator(js_State *J, js_Object *io)
+const char *jp_nextiterator(js_State *J, js_Object *io)
 {
 	int k;
 	if (io->type != JS_CITERATOR)
@@ -313,15 +313,15 @@ const char *jsV_nextiterator(js_State *J, js_Object *io)
 
 /* Walk all the properties and delete them one by one for arrays */
 
-void jsV_resizearray(js_State *J, js_Object *obj, int newlen)
+void jp_resizearray(js_State *J, js_Object *obj, int newlen)
 {
 	char buf[32];
 	const char *s;
 	int k;
 	if (newlen < obj->u.a.length) {
 		if (obj->u.a.length > obj->count * 2) {
-			js_Object *it = jsV_newiterator(J, obj, 1);
-			while ((s = jsV_nextiterator(J, it))) {
+			js_Object *it = jp_newiterator(J, obj, 1);
+			while ((s = jp_nextiterator(J, it))) {
 				k = js_ntoi(jv_ston(J, s));
 				if (k >= newlen && !strcmp(s, jv_ntos(J, buf, k)))
 					jp_delproperty(J, obj, s);

@@ -58,21 +58,11 @@ void js_free(js_State *J, void *ptr)
 	J->alloc(J->actx, ptr, 0);
 }
 
-js_String *jsV_newmemstring(js_State *J, const char *s, int n)
-{
-	js_String *v = js_malloc(J, soffsetof(js_String, p) + n + 1);
-	memcpy(v->p, s, n);
-	v->p[n] = 0;
-	v->gcmark = 0;
-	v->gcnext = J->gcstr;
-	J->gcstr = v;
-	++J->gccounter;
-	return v;
-}
+
 
 #define CHECKSTACK(n) if (TOP + n >= JS_STACKSIZE) js_stackoverflow(J)
 
-void js_pushvalue(js_State *J, js_Value v)
+void js_push_value(js_State *J, js_Value v)
 {
 	CHECKSTACK(1);
 	STACK[TOP] = v;
@@ -120,7 +110,7 @@ void js_push_string(js_State *J, const char *v)
 		STACK[TOP].type = JS_TSHRSTR;
 	} else {
 		STACK[TOP].type = JS_TMEMSTR;
-		STACK[TOP].u.memstr = jsV_newmemstring(J, v, n);
+		STACK[TOP].u.memstr = jv_memstring(J, v, n);
 	}
 	++TOP;
 }
@@ -135,7 +125,7 @@ void js_push_lstr(js_State *J, const char *v, int n)
 		STACK[TOP].type = JS_TSHRSTR;
 	} else {
 		STACK[TOP].type = JS_TMEMSTR;
-		STACK[TOP].u.memstr = jsV_newmemstring(J, v, n);
+		STACK[TOP].u.memstr = jv_memstring(J, v, n);
 	}
 	++TOP;
 }
@@ -179,10 +169,7 @@ static js_Value *stackidx(js_State *J, int idx)
 	return STACK + idx;
 }
 
-js_Value *js_tovalue(js_State *J, int idx)
-{
-	return stackidx(J, idx);
-}
+
 
 int js_is_def(js_State *J, int idx) { return stackidx(J, idx)->type != JS_TUNDEFINED; }
 int js_is_undef(js_State *J, int idx) { return stackidx(J, idx)->type == JS_TUNDEFINED; }
@@ -241,6 +228,11 @@ static const char *js_typeof(js_State *J, int idx)
 			return "function";
 		return "object";
 	}
+}
+
+js_Value *js_tovalue(js_State *J, int idx)
+{
+	return stackidx(J, idx);
 }
 
 int js_toboolean(js_State *J, int idx)
@@ -522,7 +514,7 @@ static int jr_hasproperty(js_State *J, js_Object *obj, const char *name)
 			js_push_object(J, obj);
 			js_call(J, 0);
 		} else {
-			js_pushvalue(J, ref->value);
+			js_push_value(J, ref->value);
 		}
 		return 1;
 	}
@@ -549,7 +541,7 @@ static void jr_setproperty(js_State *J, js_Object *obj, const char *name)
 			int newlen = js_ntoi(rawlen);
 			if (newlen != rawlen || newlen < 0)
 				js_error_range(J, "array length");
-			jsV_resizearray(J, obj, newlen);
+			jp_resizearray(J, obj, newlen);
 			return;
 		}
 		if (js_is_arr_index(J, name, &k))
@@ -587,7 +579,7 @@ static void jr_setproperty(js_State *J, js_Object *obj, const char *name)
 		if (ref->setter) {
 			js_push_object(J, ref->setter);
 			js_push_object(J, obj);
-			js_pushvalue(J, *value);
+			js_push_value(J, *value);
 			js_call(J, 1);
 			js_pop(J, 1);
 			return;
@@ -824,12 +816,12 @@ int js_has_prop(js_State *J, int idx, const char *name)
 
 void js_push_iterator(js_State *J, int idx, int own)
 {
-	js_push_object(J, jsV_newiterator(J, js_toobject(J, idx), own));
+	js_push_object(J, jp_newiterator(J, js_toobject(J, idx), own));
 }
 
 const char *js_next_iterator(js_State *J, int idx)
 {
-	return jsV_nextiterator(J, js_toobject(J, idx));
+	return jp_nextiterator(J, js_toobject(J, idx));
 }
 
 /* Environment records */
@@ -842,7 +834,7 @@ js_Env *jsR_newenvironment(js_State *J, js_Object *vars, js_Env *outer)
 	J->gcenv = E;
 	++J->gccounter;
 
-	E->outer = outer;
+	E->outer     = outer;
 	E->variables = vars;
 	return E;
 }
@@ -868,7 +860,7 @@ static int js_hasvar(js_State *J, const char *name)
 				js_push_object(J, E->variables);
 				js_call(J, 0);
 			} else {
-				js_pushvalue(J, ref->value);
+				js_push_value(J, ref->value);
 			}
 			return 1;
 		}
@@ -955,7 +947,7 @@ static void jsR_calllwfunction(js_State *J, int n, js_Function *F, js_Env *scope
 	jsR_run(J, F);
 	v = *stackidx(J, -1);
 	TOP = --BOT; /* clear stack */
-	js_pushvalue(J, v);
+	js_push_value(J, v);
 
 	jsR_restorescope(J);
 }
@@ -999,7 +991,7 @@ static void jsR_callfunction(js_State *J, int n, js_Function *F, js_Env *scope)
 	jsR_run(J, F);
 	v = *stackidx(J, -1);
 	TOP = --BOT; /* clear stack */
-	js_pushvalue(J, v);
+	js_push_value(J, v);
 
 	jsR_restorescope(J);
 }
@@ -1015,7 +1007,7 @@ static void jsR_callscript(js_State *J, int n, js_Function *F, js_Env *scope)
 	jsR_run(J, F);
 	v = *stackidx(J, -1);
 	TOP = --BOT; /* clear stack */
-	js_pushvalue(J, v);
+	js_push_value(J, v);
 
 	if (scope)
 		jsR_restorescope(J);
@@ -1032,7 +1024,7 @@ static void jsR_callcfunction(js_State *J, int n, int min, js_CFunction F)
 	F(J);
 	v = *stackidx(J, -1);
 	TOP = --BOT; /* clear stack */
-	js_pushvalue(J, v);
+	js_push_value(J, v);
 }
 
 static void jsR_pushtrace(js_State *J, const char *name, const char *file, int line)
@@ -1215,7 +1207,7 @@ void js_throw(js_State *J)
 		J->top = J->trybuf[J->trytop].top;
 		J->bot = J->trybuf[J->trytop].bot;
 		J->strict = J->trybuf[J->trytop].strict;
-		js_pushvalue(J, v);
+		js_push_value(J, v);
 		longjmp(J->trybuf[J->trytop].buf, 1);
 	}
 	if (J->panic)
@@ -1269,7 +1261,7 @@ void js_trap(js_State *J, int pc)
 	if (pc > 0) {
 		js_Function *F = STACK[BOT-1].u.object->u.f.function;
 		printf("trap at %d in function ", pc);
-		jsC_dumpfunction(J, F);
+		jc_dump_function(J, F);
 	}
 	jr_dump_stack(J);
 	jr_dump_env(J, J->E, 0);
@@ -1467,7 +1459,7 @@ static void jsR_run(js_State *J, js_Function *F)
 
 		case OP_ITERATOR:
 			if (!js_is_undef(J, -1) && !js_is_null(J, -1)) {
-				obj = jsV_newiterator(J, js_toobject(J, -1), 0);
+				obj = jp_newiterator(J, js_toobject(J, -1), 0);
 				js_pop(J, 1);
 				js_push_object(J, obj);
 			}
@@ -1475,7 +1467,7 @@ static void jsR_run(js_State *J, js_Function *F)
 
 		case OP_NEXTITER:
 			obj = js_toobject(J, -1);
-			str = jsV_nextiterator(J, obj);
+			str = jp_nextiterator(J, obj);
 			if (str) {
 				js_push_literal(J, str);
 				js_push_bool(J, 1);

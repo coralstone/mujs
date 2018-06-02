@@ -33,7 +33,17 @@ int js_ntoi32(double n)
 		return n;
 }
 
-
+js_String *jv_memstring(js_State *J, const char *s, int n)
+{
+	js_String *v = js_malloc(J, soffsetof(js_String, p) + n + 1);
+	memcpy(v->p, s, n);
+	v->p[n] = 0;
+	v->gcmark = 0;
+	v->gcnext = J->gcstr;
+	J->gcstr = v;
+	++J->gccounter;
+	return v;
+}
 
 /* obj.toString() */
 static int jv_toString(js_State *J, js_Object *obj)
@@ -300,7 +310,7 @@ const char *jv_tostring(js_State *J, js_Value *v)
 				return v->u.shrstr;
 			} else {
 				v->type = JS_TMEMSTR;
-				v->u.memstr = jsV_newmemstring(J, p, n);
+				v->u.memstr = jv_memstring(J, p, n);
 				return v->u.memstr->p;
 			}
 		}
@@ -329,7 +339,7 @@ static js_Object *jv_newnumber(js_State *J, double v)
 
 static js_Object *jv_newstring(js_State *J, const char *v)
 {
-	js_Object *obj = js_newobject(J, JS_CSTRING, J->String_prototype);
+	js_Object *obj  = js_newobject(J, JS_CSTRING, J->String_prototype);
 	obj->u.s.string = js_intern(J, v); /* TODO: js_String */
 	obj->u.s.length = utflen(v);
 	return obj;
